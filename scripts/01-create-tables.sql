@@ -12,8 +12,6 @@ DROP TABLE IF EXISTS documents;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS departments;
 
--- Create database and tables for Document & Note Manager
-
 -- Create departments table
 CREATE TABLE IF NOT EXISTS departments (
     id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
@@ -145,4 +143,4 @@ CREATE TABLE IF NOT EXISTS notifications (
     is_read BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
+); 
