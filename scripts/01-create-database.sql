@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS users (
     role ENUM('user', 'administrator') DEFAULT 'user',
     department_id INT,
     is_active BOOLEAN DEFAULT TRUE,
+    last_access TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL

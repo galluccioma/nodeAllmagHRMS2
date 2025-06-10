@@ -24,6 +24,7 @@ interface UserType {
   role: string
   is_active: boolean
   created_at: string
+  last_access: string
   departments?: Department[]
 }
 
@@ -353,6 +354,15 @@ export default function AdminUsersPage() {
                     </div>
                     <p className="text-sm text-gray-500">
                       Creato: {new Date(user.created_at).toLocaleDateString("it-IT")}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Ultimo accesso: {user.last_access ? new Date(user.last_access).toLocaleDateString("it-IT", {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      }) : "Mai"}
                     </p>
                   </div>
                   <div className="flex space-x-2">

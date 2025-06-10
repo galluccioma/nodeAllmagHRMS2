@@ -14,7 +14,7 @@ export async function POST(request) {
       `SELECT u.*, d.name as department_name 
        FROM users u 
        LEFT JOIN departments d ON u.department_id = d.id 
-       WHERE u.email = ? AND u.is_active = TRUE`,
+       WHERE u.email = ?`,
       [email],
     )
 
@@ -23,11 +23,19 @@ export async function POST(request) {
     }
 
     const user = users[0]
+
+    if (!user.is_active) {
+      return NextResponse.json({ error: "Account is disabled" }, { status: 403 })
+    }
+
     const isValidPassword = await comparePassword(password, user.password_hash)
 
     if (!isValidPassword) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
     }
+
+    // Update last access time
+    await db.execute("UPDATE users SET last_access = CURRENT_TIMESTAMP WHERE id = ?", [user.id])
 
     const token = generateToken(user)
 

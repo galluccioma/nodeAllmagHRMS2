@@ -13,7 +13,7 @@ export async function GET(request) {
 
     const [users] = await db.execute(`
       SELECT u.id, u.first_name, u.last_name, u.email, u.role, 
-             u.department_id, d.name as department_name, u.is_active, u.created_at
+             u.department_id, d.name as department_name, u.is_active, u.created_at, u.last_access
       FROM users u 
       LEFT JOIN departments d ON u.department_id = d.id 
       ORDER BY u.created_at DESC

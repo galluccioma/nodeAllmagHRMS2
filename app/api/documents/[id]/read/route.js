@@ -38,6 +38,9 @@ export async function POST(request, { params }) {
 
     // Log the read activity
     await db.execute("INSERT INTO document_read_logs (document_id, user_id) VALUES (?, ?)", [documentId, user.id])
+    
+    // Update last access time
+    await db.execute("UPDATE users SET last_access = CURRENT_TIMESTAMP WHERE id = ?", [user.id])
 
     return NextResponse.json({ message: "Read logged successfully" })
   } catch (error) {
