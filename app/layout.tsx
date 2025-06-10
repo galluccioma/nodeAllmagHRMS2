@@ -6,7 +6,7 @@ import "./globals.css"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Document & Note Manager",
+  title: "Allmag Software",
   description: "Secure document sharing and collaboration platform",
     generator: 'v0.dev'
 }

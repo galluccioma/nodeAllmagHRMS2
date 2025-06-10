@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { FileText, StickyNote, Users, Building2, Activity, Home, LogOut, Shield, User } from "lucide-react"
+import Image from "next/image"
 
 interface UserType {
   id: number
@@ -97,9 +98,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar {...props}>
       <SidebarHeader className="p-4">
-        <div className="flex items-center space-x-2">
-          <FileText className="h-6 w-6 text-blue-600" />
-          <span className="font-semibold text-lg">Allmag HRMS</span>
+        <div className="flex flex-col items-center justify-center space-x-2">
+          <Image src={"/allmag_logo.png"} alt="Logo" width={128} height={32}/>
+          <span className="font-semibold text-lg">HRMS Software</span>
         </div>
         {user && (
           <div className="mt-4 p-3 bg-gray-50 rounded-lg">
