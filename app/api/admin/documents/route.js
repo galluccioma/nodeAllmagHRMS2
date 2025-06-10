@@ -16,7 +16,7 @@ export async function GET(request) {
              u.first_name as uploader_first_name, 
              u.last_name as uploader_last_name,
              (SELECT COUNT(*) FROM document_read_logs WHERE document_id = d.id) as read_count,
-             (SELECT COUNT(*) FROM document_download_logs WHERE document_id = d.id) as download_count
+             (SELECT COUNT(DISTINCT user_id) FROM document_download_logs WHERE document_id = d.id) as download_count
       FROM documents d
       JOIN users u ON d.uploaded_by = u.id
       ORDER BY d.created_at DESC

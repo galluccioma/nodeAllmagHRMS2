@@ -99,7 +99,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader className="p-4">
         <div className="flex items-center space-x-2">
           <FileText className="h-6 w-6 text-blue-600" />
-          <span className="font-semibold text-lg">DocManager</span>
+          <span className="font-semibold text-lg">Allmag HRMS</span>
         </div>
         {user && (
           <div className="mt-4 p-3 bg-gray-50 rounded-lg">
@@ -131,7 +131,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Menu Principale</SidebarGroupLabel>
+          <SidebarGroupLabel>Menu Utenti</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {userMenuItems.map((item) => (

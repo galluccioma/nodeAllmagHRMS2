@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import db from "@/lib/database"
 import { verifyToken } from "@/lib/auth"
+import { saveFile } from "@/lib/file-storage"
 
 export async function GET(request) {
   try {
@@ -63,14 +64,27 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
+    console.log('Starting document upload process...')
+    
     const token = request.headers.get("authorization")?.replace("Bearer ", "")
+    console.log('Token received:', token ? 'Yes' : 'No')
+    
     const user = verifyToken(token)
+    console.log('User verified:', user ? `ID: ${user.id}` : 'No')
 
     if (!user) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 })
     }
 
     const formData = await request.formData()
+    console.log('Form data received:', {
+      hasTitle: formData.has('title'),
+      hasFile: formData.has('file'),
+      hasDescription: formData.has('description'),
+      hasDepartmentIds: formData.has('departmentIds'),
+      hasUserIds: formData.has('userIds')
+    })
+
     const title = formData.get("title")
     const description = formData.get("description")
     const file = formData.get("file")
@@ -81,63 +95,49 @@ export async function POST(request) {
       return NextResponse.json({ error: "Title and file are required" }, { status: 400 })
     }
 
-    // Handle file upload
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-    
-    // Generate a unique filename
-    const timestamp = Date.now()
-    const originalName = file.name
-    const fileExtension = originalName.split('.').pop()
-    const fileName = `${timestamp}-${originalName}`
-    const filePath = `uploads/${fileName}`
-    
-    // Save file to disk
-    const fs = require('fs')
-    const path = require('path')
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads')
-    
-    // Create uploads directory if it doesn't exist
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true })
-    }
-    
-    fs.writeFileSync(path.join(uploadDir, fileName), buffer)
+    console.log('Starting file upload...')
+    // Handle file upload using saveFile
+    const fileInfo = await saveFile(file, "documents")
+    console.log('File uploaded successfully:', fileInfo)
 
+    console.log('Creating document record in database...')
     // Create the document
     const [result] = await db.execute(
-      "INSERT INTO documents (title, description, file_path, file_name, file_size, mime_type, uploaded_by) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [title, description, filePath, originalName, buffer.length, file.type, user.id]
+      "INSERT INTO documents (title, description, file_path, file_name, file_size, mime_type, uploaded_by, public_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      [title, description, fileInfo.filePath, file.name, file.size, file.type, user.id, fileInfo.publicUrl]
     )
     const documentId = result.insertId
+    console.log('Document created with ID:', documentId)
 
-    // Assign department visibility
-    if (Array.isArray(departmentIds) && departmentIds.length > 0) {
-      await Promise.all(
-        departmentIds.map(deptId =>
-          db.execute(
-            "INSERT INTO document_department_visibility (document_id, department_id) VALUES (?, ?)",
-            [documentId, deptId]
-          )
-        )
-      )
+    // Set visibility
+    if (departmentIds.length > 0) {
+      console.log('Setting department visibility...')
+      for (const deptId of departmentIds) {
+        await db.execute("INSERT INTO document_department_visibility (document_id, department_id) VALUES (?, ?)", [
+          documentId,
+          deptId,
+        ])
+      }
+    } else if (userIds.length > 0) {
+      console.log('Setting user visibility...')
+      for (const userId of userIds) {
+        await db.execute("INSERT INTO document_user_visibility (document_id, user_id) VALUES (?, ?)", [
+          documentId,
+          userId,
+        ])
+      }
     }
 
-    // Assign user visibility
-    if (Array.isArray(userIds) && userIds.length > 0) {
-      await Promise.all(
-        userIds.map(userId =>
-          db.execute(
-            "INSERT INTO document_user_visibility (document_id, user_id) VALUES (?, ?)",
-            [documentId, userId]
-          )
-        )
-      )
-    }
-
-    return NextResponse.json({ message: "Document created successfully", id: documentId }, { status: 201 })
+    return NextResponse.json({ id: documentId }, { status: 201 })
   } catch (error) {
-    console.error("Error creating document:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("Error uploading document:", {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    })
+    return NextResponse.json({ 
+      error: "Internal server error",
+      details: error.message 
+    }, { status: 500 })
   }
 }

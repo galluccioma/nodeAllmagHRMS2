@@ -72,12 +72,20 @@ export default function DocumentViewModal({ documentId, isOpen, onClose, onRefre
   const handleDocumentDownload = async () => {
     const token = localStorage.getItem("token")
     try {
-      await fetch(`/api/documents/${documentId}/download`, {
+      const response = await fetch(`/api/documents/${documentId}/download`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       })
-      fetchDocument()
-      onRefresh?.()
+      
+      if (response.ok) {
+        const data = await response.json()
+        // Open the download URL in a new tab
+        window.open(data.downloadUrl, '_blank')
+        fetchDocument()
+        onRefresh?.()
+      } else {
+        console.error("Error initiating download")
+      }
     } catch (error) {
       console.error("Errore nel download:", error)
     }
@@ -190,7 +198,7 @@ export default function DocumentViewModal({ documentId, isOpen, onClose, onRefre
               </Button>
               <Button onClick={handleDocumentDownload} className="flex-1 bg-green-600 hover:bg-green-700">
                 <Download className="h-4 w-4 mr-2" />
-                {document.is_downloaded ? "Scaricato" : "Scarica"}
+                Scarica
               </Button>
             </div>
           </div>

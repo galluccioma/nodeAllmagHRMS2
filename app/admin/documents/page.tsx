@@ -13,7 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
-import { FileText, Trash2, Download, Eye, Edit, Search, Calendar, User, Upload } from "lucide-react"
+import { FileText, Trash2, Download, Eye, Edit, Search, Calendar, User, Upload, Activity, Pencil } from "lucide-react"
 import DocumentActivityModal from "@/components/document-activity-modal"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -292,6 +292,27 @@ export default function AdminDocumentsPage() {
     setShowCreateModal(false)
     setEditingDocument(null)
     fetchDocuments()
+  }
+
+  const handleDocumentDownload = async (documentId: number) => {
+    const token = localStorage.getItem("token")
+    try {
+      const response = await fetch(`/api/documents/${documentId}/download`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        // Open the download URL in a new tab
+        window.open(data.downloadUrl, '_blank')
+        fetchDocuments()
+      } else {
+        console.error("Error initiating download")
+      }
+    } catch (error) {
+      console.error("Errore nel download:", error)
+    }
   }
 
   if (loading) {

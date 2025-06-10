@@ -26,7 +26,7 @@ export async function GET(request, { params }) {
       [documentId],
     )
 
-    // Get download logs
+    // Get latest download per user
     const [downloadLogs] = await db.execute(
       `
       SELECT ddl.downloaded_at, u.id as user_id, u.first_name, u.last_name, u.email, d.name as department_name
@@ -34,6 +34,12 @@ export async function GET(request, { params }) {
       JOIN users u ON ddl.user_id = u.id
       LEFT JOIN departments d ON u.department_id = d.id
       WHERE ddl.document_id = ?
+      AND ddl.downloaded_at = (
+        SELECT MAX(downloaded_at)
+        FROM document_download_logs
+        WHERE document_id = ddl.document_id
+        AND user_id = ddl.user_id
+      )
       ORDER BY ddl.downloaded_at DESC
     `,
       [documentId],

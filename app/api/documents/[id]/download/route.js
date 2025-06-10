@@ -13,6 +13,18 @@ export async function POST(request, { params }) {
 
     const documentId = params.id
 
+    // Get document details including public URL
+    const [documents] = await db.execute(
+      "SELECT public_url FROM documents WHERE id = ?",
+      [documentId]
+    )
+
+    if (documents.length === 0) {
+      return NextResponse.json({ error: "Document not found" }, { status: 404 })
+    }
+
+    const document = documents[0]
+
     // Check if user has access to this document
     const [access] = await db.execute(
       `
@@ -39,7 +51,11 @@ export async function POST(request, { params }) {
     // Log the download activity
     await db.execute("INSERT INTO document_download_logs (document_id, user_id) VALUES (?, ?)", [documentId, user.id])
 
-    return NextResponse.json({ message: "Download logged successfully" })
+    // Return the public URL for the file
+    return NextResponse.json({ 
+      message: "Download logged successfully",
+      downloadUrl: document.public_url 
+    })
   } catch (error) {
     console.error("Error logging document download:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

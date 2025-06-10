@@ -30,7 +30,7 @@ async function runMigrations() {
     console.log("Database connection created successfully")
 
     // Create database if it doesn't exist
-    const dbName = process.env.DB_NAME || "node2"
+    const dbName = process.env.DB_NAME || "main"
     console.log(`Attempting to create/use database: ${dbName}`)
     
     try {

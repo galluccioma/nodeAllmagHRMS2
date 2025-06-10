@@ -217,7 +217,7 @@ export default function Dashboard() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
@@ -244,30 +244,6 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Bell className="h-8 w-8 text-yellow-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Notifiche</p>
-                  <p className="text-2xl font-bold text-gray-900">{notifications.length}</p>
-                  {unreadNotifications > 0 && <p className="text-sm text-red-600">{unreadNotifications} unread</p>}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Users className="h-8 w-8 text-purple-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Dipartimento</p>
-                  <p className="text-lg font-bold text-gray-900">{user.department_name}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Tabs */}
@@ -286,14 +262,6 @@ export default function Dashboard() {
               {unreadNotes > 0 && (
                 <Badge variant="destructive" className="ml-2 text-xs">
                   {unreadNotes}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="notifications">
-              Notifiche
-              {unreadNotifications > 0 && (
-                <Badge variant="destructive" className="ml-2 text-xs">
-                  {unreadNotifications}
                 </Badge>
               )}
             </TabsTrigger>
@@ -386,42 +354,6 @@ export default function Dashboard() {
             </div>
           </TabsContent>
 
-          <TabsContent value="notifications">
-            <div className="grid gap-4">
-              {notifications.length === 0 ? (
-                <Card>
-                  <CardContent className="p-8 text-center">
-                    <Bell className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">Nessuna notifica</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                notifications.map((notification) => (
-                  <Card key={notification.id} className={!notification.is_read ? "border-yellow-200 bg-yellow-50" : ""}>
-                    <CardContent className="p-4">
-                      <div className="flex items-start space-x-3">
-                        <Bell
-                          className={`h-5 w-5 mt-1 ${notification.is_read ? "text-gray-400" : "text-yellow-600"}`}
-                        />
-                        <div className="flex-1">
-                          <h4 className="font-medium">{notification.title}</h4>
-                          <p className="text-gray-600 text-sm">{notification.message}</p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {new Date(notification.created_at).toLocaleString()}
-                          </p>
-                        </div>
-                        {!notification.is_read && (
-                          <Badge variant="destructive" className="text-xs">
-                            New
-                          </Badge>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
-          </TabsContent>
         </Tabs>
       </main>
     </div>

@@ -77,11 +77,19 @@ export default function DocumentsPage() {
   const handleDocumentDownload = async (documentId: number) => {
     const token = localStorage.getItem("token")
     try {
-      await fetch(`/api/documents/${documentId}/download`, {
+      const response = await fetch(`/api/documents/${documentId}/download`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       })
-      fetchDocuments()
+      
+      if (response.ok) {
+        const data = await response.json()
+        // Open the download URL in a new tab
+        window.open(data.downloadUrl, '_blank')
+        fetchDocuments()
+      } else {
+        console.error("Error initiating download")
+      }
     } catch (error) {
       console.error("Errore nel download:", error)
     }
@@ -235,7 +243,7 @@ export default function DocumentsPage() {
                           className="min-w-[100px] bg-green-600 hover:bg-green-700"
                         >
                           <Download className="h-4 w-4 mr-1" />
-                          {doc.is_downloaded ? "Scaricato" : "Scarica"}
+                          Scarica
                         </Button>
                       </div>
                     </div>

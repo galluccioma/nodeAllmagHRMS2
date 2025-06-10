@@ -14,7 +14,7 @@ interface ActivityLog {
   first_name: string
   last_name: string
   email: string
-  department_name: string
+  department_name?: string
 }
 
 interface DocumentActivityModalProps {
@@ -71,7 +71,7 @@ export default function DocumentActivityModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Attività Documento</DialogTitle>
           <DialogDescription>Visualizza chi ha letto e scaricato questo documento</DialogDescription>
@@ -84,48 +84,35 @@ export default function DocumentActivityModal({
         ) : (
           <Tabs defaultValue="reads" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="reads" className="flex items-center gap-2">
-                <Eye className="h-4 w-4" />
-                Letture ({readCount})
+              <TabsTrigger value="reads">
+                Letture ({reads.length})
               </TabsTrigger>
-              <TabsTrigger value="downloads" className="flex items-center gap-2">
-                <Download className="h-4 w-4" />
-                Download ({downloadCount})
+              <TabsTrigger value="downloads">
+                Download ({downloads.length})
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="reads" className="space-y-4">
+            <TabsContent value="reads" className="mt-4">
               {reads.length === 0 ? (
-                <Card>
-                  <CardContent className="p-8 text-center">
-                    <Eye className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">Nessuna lettura registrata</p>
-                  </CardContent>
-                </Card>
+                <div className="text-center py-8">
+                  <p className="text-gray-500">Nessuna lettura registrata</p>
+                </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {reads.map((read, index) => {
-                    const { date, time } = formatDateTime(read.read_at!)
+                    const { date, time } = formatDateTime(read.read_at || '')
                     return (
-                      <Card key={index} className="hover:shadow-md transition-shadow">
+                      <Card key={index}>
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <div className="p-2 bg-blue-100 rounded-full">
-                                <User className="h-4 w-4 text-blue-600" />
-                              </div>
-                              <div>
-                                <p className="font-medium text-gray-900">
-                                  {read.first_name} {read.last_name}
-                                </p>
-                                <p className="text-sm text-gray-500">{read.email}</p>
-                                {read.department_name && (
-                                  <div className="flex items-center gap-1 mt-1">
-                                    <Building2 className="h-3 w-3 text-gray-400" />
-                                    <span className="text-xs text-gray-400">{read.department_name}</span>
-                                  </div>
-                                )}
-                              </div>
+                            <div>
+                              <h4 className="font-medium text-gray-900">
+                                {read.first_name} {read.last_name}
+                              </h4>
+                              <p className="text-sm text-gray-500">{read.email}</p>
+                              {read.department_name && (
+                                <p className="text-sm text-gray-500">{read.department_name}</p>
+                              )}
                             </div>
                             <div className="text-right">
                               <div className="flex items-center gap-1 text-sm text-gray-600">
@@ -146,38 +133,27 @@ export default function DocumentActivityModal({
               )}
             </TabsContent>
 
-            <TabsContent value="downloads" className="space-y-4">
+            <TabsContent value="downloads" className="mt-4">
               {downloads.length === 0 ? (
-                <Card>
-                  <CardContent className="p-8 text-center">
-                    <Download className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">Nessun download registrato</p>
-                  </CardContent>
-                </Card>
+                <div className="text-center py-8">
+                  <p className="text-gray-500">Nessun download registrato</p>
+                </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {downloads.map((download, index) => {
-                    const { date, time } = formatDateTime(download.downloaded_at!)
+                    const { date, time } = formatDateTime(download.downloaded_at || '')
                     return (
-                      <Card key={index} className="hover:shadow-md transition-shadow">
+                      <Card key={index}>
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <div className="p-2 bg-green-100 rounded-full">
-                                <User className="h-4 w-4 text-green-600" />
-                              </div>
-                              <div>
-                                <p className="font-medium text-gray-900">
-                                  {download.first_name} {download.last_name}
-                                </p>
-                                <p className="text-sm text-gray-500">{download.email}</p>
-                                {download.department_name && (
-                                  <div className="flex items-center gap-1 mt-1">
-                                    <Building2 className="h-3 w-3 text-gray-400" />
-                                    <span className="text-xs text-gray-400">{download.department_name}</span>
-                                  </div>
-                                )}
-                              </div>
+                            <div>
+                              <h4 className="font-medium text-gray-900">
+                                {download.first_name} {download.last_name}
+                              </h4>
+                              <p className="text-sm text-gray-500">{download.email}</p>
+                              {download.department_name && (
+                                <p className="text-sm text-gray-500">{download.department_name}</p>
+                              )}
                             </div>
                             <div className="text-right">
                               <div className="flex items-center gap-1 text-sm text-gray-600">

@@ -12,9 +12,10 @@ export async function GET(request) {
     }
 
     const [departments] = await db.execute(
-      `SELECT d.*, COUNT(u.id) as user_count 
+      `SELECT d.*, COUNT(DISTINCT ud.user_id) as user_count 
        FROM departments d 
-       LEFT JOIN users u ON d.id = u.department_id AND u.is_active = TRUE
+       LEFT JOIN user_departments ud ON d.id = ud.department_id
+       LEFT JOIN users u ON ud.user_id = u.id AND u.is_active = TRUE
        GROUP BY d.id 
        ORDER BY d.name`,
     )
