@@ -11,7 +11,7 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Accesso amministratore richiesto" }, { status: 403 })
     }
 
-    const noteId = params.id
+    const { id: noteId } = await params
 
     // Get department assignments
     const [departmentRows] = await db.execute(`SELECT department_id FROM note_department_visibility WHERE note_id = ?`, [

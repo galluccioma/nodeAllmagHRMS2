@@ -11,7 +11,7 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 })
     }
 
-    const documentId = params.id
+    const { id: documentId } = await params
 
     // Get document details including public URL
     const [documents] = await db.execute(
@@ -50,6 +50,9 @@ export async function POST(request, { params }) {
 
     // Log the download activity
     await db.execute("INSERT INTO document_download_logs (document_id, user_id) VALUES (?, ?)", [documentId, user.id])
+    
+    // Update last access time
+    await db.execute("UPDATE users SET last_access = CURRENT_TIMESTAMP WHERE id = ?", [user.id])
 
     // Return the public URL for the file
     return NextResponse.json({ 

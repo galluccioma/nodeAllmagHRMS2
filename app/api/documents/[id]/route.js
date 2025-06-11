@@ -11,7 +11,7 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Autenticazione richiesta" }, { status: 401 })
     }
 
-    const documentId = params.id
+    const { id: documentId } = await params
 
     // Check if user has access to this document
     const [access] = await db.execute(

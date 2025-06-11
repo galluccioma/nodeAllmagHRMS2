@@ -11,7 +11,7 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Accesso amministratore richiesto" }, { status: 403 })
     }
 
-    const userId = params.id
+    const { id: userId } = await params
 
     const [departments] = await db.execute(
       `SELECT d.id, d.name 
@@ -37,7 +37,7 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: "Accesso amministratore richiesto" }, { status: 403 })
     }
 
-    const userId = params.id
+    const { id: userId } = await params
     const { departmentIds } = await request.json()
 
     if (!Array.isArray(departmentIds)) {

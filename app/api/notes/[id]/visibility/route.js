@@ -11,7 +11,7 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 })
     }
 
-    const noteId = params.id
+    const { id: noteId } = await params
 
     // Get department visibility
     const [departmentVisibility] = await db.execute(
