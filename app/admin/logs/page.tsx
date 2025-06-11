@@ -73,11 +73,11 @@ export default function AdminLogsPage() {
   const formatLogType = (type: string) => {
     switch (type) {
       case "document_read":
-        return "Document Read"
+        return "Documento Letto"
       case "document_download":
-        return "Document Download"
+        return "Documento Scaricato"
       case "note_read":
-        return "Note Read"
+        return "Nota Letta"
       default:
         return type
     }
@@ -114,10 +114,10 @@ export default function AdminLogsPage() {
                 <SelectValue placeholder="Filter by type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Activities</SelectItem>
-                <SelectItem value="document_reads">Document Reads</SelectItem>
-                <SelectItem value="document_downloads">Document Downloads</SelectItem>
-                <SelectItem value="note_reads">Note Reads</SelectItem>
+                <SelectItem value="all">Tutte le Attività</SelectItem>
+                <SelectItem value="document_reads">Documento Letto</SelectItem>
+                <SelectItem value="document_downloads">Documento Scaricato</SelectItem>
+                <SelectItem value="note_reads">Nota Letta</SelectItem>
               </SelectContent>
             </Select>
           </div>
