@@ -11,7 +11,7 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Autenticazione richiesta" }, { status: 401 })
     }
 
-    const noteId = params.id
+    const { id: noteId } = await params
 
     // Check if user has access to this note
     const [access] = await db.execute(
@@ -59,7 +59,7 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 })
     }
 
-    const noteId = params.id
+    const { id: noteId } = await params
     const { title, content, departmentIds, userIds } = await request.json()
 
     if (!title || !content) {

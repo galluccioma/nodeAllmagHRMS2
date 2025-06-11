@@ -11,7 +11,7 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Accesso amministratore richiesto" }, { status: 403 })
     }
 
-    const documentId = params.id
+    const { id: documentId } = await params
 
     // Get department visibility
     const [departmentVisibility] = await db.execute(

@@ -11,7 +11,7 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: "Accesso amministratore richiesto" }, { status: 403 })
     }
 
-    const documentId = params.id
+    const { id: documentId } = await params
     const { title, description } = await request.json()
 
     if (!title) {
@@ -40,7 +40,7 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ error: "Accesso amministratore richiesto" }, { status: 403 })
     }
 
-    const documentId = params.id
+    const { id: documentId } = await params
 
     await db.execute("DELETE FROM documents WHERE id = ?", [documentId])
 

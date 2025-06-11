@@ -36,7 +36,7 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ error: "Accesso amministratore richiesto" }, { status: 403 })
     }
 
-    const noteId = params.id
+    const { id: noteId } = await params
 
     await db.execute("DELETE FROM notes WHERE id = ?", [noteId])
 

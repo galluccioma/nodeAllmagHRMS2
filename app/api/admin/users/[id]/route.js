@@ -11,7 +11,7 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: "Administrator access required" }, { status: 403 })
     }
 
-    const userId = params.id
+    const { id: userId } = await params
     const { first_name, last_name, email, password, role, department_id, is_active } = await request.json()
 
     if (!first_name || !last_name || !email) {
@@ -20,7 +20,7 @@ export async function PUT(request, { params }) {
 
     let updateQuery = `
       UPDATE users 
-      SET first_name = ?, last_name = ?, email = ?, role = ?, department_id = ?, is_active = ?
+      SET first_name = ?, last_name = ?, email = ?, role = ?, department_id = ?, is_active = ?, last_access = CURRENT_TIMESTAMP
     `
     const params_array = [first_name, last_name, email, role, department_id === undefined ? null : department_id, is_active]
 
@@ -51,7 +51,7 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ error: "Administrator access required" }, { status: 403 })
     }
 
-    const userId = params.id
+    const { id: userId } = await params
 
     // Don't allow deleting yourself
     if (Number.parseInt(userId) === user.id) {

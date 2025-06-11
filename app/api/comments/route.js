@@ -67,6 +67,9 @@ export async function POST(request) {
       return NextResponse.json({ error: "Accesso negato" }, { status: 403 })
     }
 
+    // Update last access time
+    await db.execute("UPDATE users SET last_access = CURRENT_TIMESTAMP WHERE id = ?", [user.id])
+
     // Insert comment
     const [result] = await db.execute(
       `INSERT INTO comments (content, user_id, item_type, item_id) VALUES (?, ?, ?, ?)`,

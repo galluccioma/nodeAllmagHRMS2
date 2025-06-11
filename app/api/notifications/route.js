@@ -16,6 +16,9 @@ export async function GET(request) {
       [user.id],
     )
 
+    // Update last access time
+    await db.execute("UPDATE users SET last_access = CURRENT_TIMESTAMP WHERE id = ?", [user.id])
+
     return NextResponse.json(notifications)
   } catch (error) {
     console.error("Error fetching notifications:", error)

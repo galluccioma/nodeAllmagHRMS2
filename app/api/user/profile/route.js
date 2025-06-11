@@ -14,7 +14,7 @@ export async function GET(request) {
     const [userData] = await db.execute(
       `
       SELECT u.id, u.first_name, u.last_name, u.email, u.role, 
-             u.department_id, d.name as department_name
+             u.department_id, d.name as department_name, u.last_access
       FROM users u 
       LEFT JOIN departments d ON u.department_id = d.id 
       WHERE u.id = ?
@@ -67,21 +67,19 @@ export async function PUT(request) {
 
       const isValidPassword = await comparePassword(current_password, userData[0].password_hash)
       if (!isValidPassword) {
-        return NextResponse.json({ error: "Password attuale non valida" }, { status: 401 })
+        return NextResponse.json({ error: "Password attuale non valida" }, { status: 400 })
       }
 
-      // Update user with new password
-      const hashedPassword = await hashPassword(new_password)
-      await db.execute("UPDATE users SET first_name = ?, last_name = ?, email = ?, password_hash = ? WHERE id = ?", [
-        first_name,
-        last_name,
-        email,
-        hashedPassword,
-        user.id,
-      ])
+      // Update user profile
+      await db.execute(
+        `UPDATE users 
+         SET first_name = ?, last_name = ?, email = ?, last_access = CURRENT_TIMESTAMP, password_hash = ?
+         WHERE id = ?`,
+        [first_name, last_name, email, await hashPassword(new_password), user.id]
+      )
     } else {
       // Update user without changing password
-      await db.execute("UPDATE users SET first_name = ?, last_name = ?, email = ? WHERE id = ?", [
+      await db.execute("UPDATE users SET first_name = ?, last_name = ?, email = ?, last_access = CURRENT_TIMESTAMP WHERE id = ?", [
         first_name,
         last_name,
         email,
