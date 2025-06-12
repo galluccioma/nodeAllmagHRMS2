@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
-import { Building2, Plus, Edit, Trash2, Users } from "lucide-react"
+import { Building2, Plus, Edit, Trash2, Users, FileText } from "lucide-react"
 
 interface Department {
   id: number
@@ -155,13 +155,21 @@ export default function AdminDepartmentsPage() {
   }
 
   return (
-    <div className="flex flex-col">
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-        <SidebarTrigger className="-ml-1" />
-        <Separator orientation="vertical" className="mr-2 h-4" />
-        <div className="flex items-center space-x-2">
-          <Building2 className="h-5 w-5" />
-          <h1 className="text-lg font-semibold">Department Management</h1>
+    <div className="flex flex-col min-h-screen bg-gray-50">
+        <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="flex h-16 items-center gap-4 px-6">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="h-6" />
+          <div className="flex items-center space-x-3">
+            <Building2 className="h-6 w-6 text-blue-600" />
+            <h1 className="text-xl font-bold text-gray-900">Dipartimenti</h1>
+          </div>
+          <div className="ml-auto">
+            <Button onClick={() => setShowCreateModal(true)} className="bg-blue-600 hover:bg-blue-700">
+              <Plus className="h-4 w-4 mr-2" />
+              Organizza Dipartimenti
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -178,18 +186,7 @@ export default function AdminDepartmentsPage() {
           </Alert>
         )}
 
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h2 className="text-2xl font-bold">Departments</h2>
-            <p className="text-gray-600">Manage organizational departments</p>
-          </div>
-          <Button onClick={() => setShowCreateModal(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Department
-          </Button>
-        </div>
-
-        <div className="grid gap-4">
+        <div className="grid gap-4 max-w-7xl mx-auto space-y-6">
           {departments.map((department) => (
             <Card key={department.id}>
               <CardContent className="p-6">

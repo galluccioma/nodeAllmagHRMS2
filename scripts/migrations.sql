@@ -14,6 +14,7 @@ DROP TABLE IF EXISTS notes;
 DROP TABLE IF EXISTS documents;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS departments;
+DROP TABLE IF EXISTS user_departments;
 
 -- Create departments table
 CREATE TABLE IF NOT EXISTS departments (
@@ -42,6 +43,18 @@ CREATE TABLE IF NOT EXISTS users (
     INDEX idx_user_email (email),
     INDEX idx_user_department (department_id),
     INDEX idx_user_role (role)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create user_departments table for many-to-many relationship
+CREATE TABLE IF NOT EXISTS user_departments (
+    id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    user_id INT UNSIGNED NOT NULL,
+    department_id INT UNSIGNED NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_user_dept (user_id, department_id),
+    INDEX idx_user_dept (user_id, department_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Create documents table
