@@ -23,22 +23,40 @@ async function seedDatabase() {
 
     console.log("🌱 Inizio seeding del database...")
 
-    // Check if data already exists
-    const [existingUsers] = await connection.execute("SELECT COUNT(*) as count FROM users")
-    if (existingUsers[0].count > 0) {
-      console.log("⚠️  Il database contiene già dati. Saltando il seeding.")
-      return
-    }
+    // Delete all existing data in reverse order of dependencies
+    console.log("🗑️  Eliminazione dati esistenti...")
+    await connection.execute("DELETE FROM notifications")
+    await connection.execute("DELETE FROM note_read_logs")
+    await connection.execute("DELETE FROM document_download_logs")
+    await connection.execute("DELETE FROM document_read_logs")
+    await connection.execute("DELETE FROM note_user_visibility")
+    await connection.execute("DELETE FROM note_department_visibility")
+    await connection.execute("DELETE FROM document_user_visibility")
+    await connection.execute("DELETE FROM document_department_visibility")
+    await connection.execute("DELETE FROM notes")
+    await connection.execute("DELETE FROM documents")
+    await connection.execute("DELETE FROM users")
+    await connection.execute("DELETE FROM departments")
+    console.log("✅ Dati esistenti eliminati")
 
     // Create departments
     console.log("📁 Creazione dipartimenti...")
-    const departments = ["Human Resources", "Information Technology", "Finance", "Marketing", "Operations"]
+    const departments = [
+      { name: "Human Resources", description: "Gestione risorse umane e personale" },
+      { name: "Information Technology", description: "Sviluppo e manutenzione sistemi informativi" },
+      { name: "Finance", description: "Gestione finanziaria e contabilità" },
+      { name: "Marketing", description: "Marketing e comunicazione" },
+      { name: "Operations", description: "Gestione operativa" }
+    ]
 
     const departmentIds = []
     for (const dept of departments) {
-      const [result] = await connection.execute("INSERT INTO departments (name) VALUES (?)", [dept])
+      const [result] = await connection.execute(
+        "INSERT INTO departments (name, description) VALUES (?, ?)",
+        [dept.name, dept.description]
+      )
       departmentIds.push(result.insertId)
-      console.log(`✅ Dipartimento creato: ${dept}`)
+      console.log(`✅ Dipartimento creato: ${dept.name}`)
     }
 
     // Create admin user
@@ -46,16 +64,10 @@ async function seedDatabase() {
     const adminPassword = await bcrypt.hash("admin123", 10)
     const [adminResult] = await connection.execute(
       `
-      INSERT INTO users (first_name, last_name, email, password, role, is_active) 
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO users (first_name, last_name, email, password_hash, role, department_id, is_active) 
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `,
-      ["Admin", "User", "admin@company.com", adminPassword, "admin", 1],
-    )
-
-    // Assign admin to IT department
-    await connection.execute(
-      "INSERT INTO user_departments (user_id, department_id) VALUES (?, ?)",
-      [adminResult.insertId, departmentIds[1]], // IT department
+      ["Admin", "User", "admin@company.com", adminPassword, "administrator", departmentIds[1], 1]
     )
     console.log("✅ Amministratore creato: admin@company.com / admin123")
 
@@ -74,18 +86,11 @@ async function seedDatabase() {
     for (const user of sampleUsers) {
       const [userResult] = await connection.execute(
         `
-        INSERT INTO users (first_name, last_name, email, password, role, is_active) 
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO users (first_name, last_name, email, password_hash, role, department_id, is_active) 
+        VALUES (?, ?, ?, ?, ?, ?, ?)
       `,
-        [user.firstName, user.lastName, user.email, userPassword, "user", 1],
+        [user.firstName, user.lastName, user.email, userPassword, "user", departmentIds[user.deptIndex], 1]
       )
-
-      // Assign user to department
-      await connection.execute("INSERT INTO user_departments (user_id, department_id) VALUES (?, ?)", [
-        userResult.insertId,
-        departmentIds[user.deptIndex],
-      ])
-
       console.log(`✅ Utente creato: ${user.email} / password123`)
     }
 
@@ -96,34 +101,49 @@ async function seedDatabase() {
         title: "Manuale Dipendenti 2024",
         description: "Guida completa per tutti i dipendenti dell'azienda",
         fileName: "manuale-dipendenti-2024.pdf",
+        fileSize: 1024000,
+        mimeType: "application/pdf"
       },
       {
         title: "Politiche di Sicurezza IT",
         description: "Linee guida per la sicurezza informatica aziendale",
         fileName: "politiche-sicurezza-it.pdf",
+        fileSize: 512000,
+        mimeType: "application/pdf"
       },
       {
         title: "Budget Annuale 2024",
         description: "Pianificazione finanziaria per l'anno corrente",
         fileName: "budget-2024.xlsx",
+        fileSize: 256000,
+        mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       },
     ]
 
     for (const doc of sampleDocuments) {
       const [docResult] = await connection.execute(
         `
-        INSERT INTO documents (title, description, file_name, file_path, uploader_id, created_at) 
-        VALUES (?, ?, ?, ?, ?, NOW())
+        INSERT INTO documents (
+          title, description, file_name, file_path, file_size, mime_type, uploaded_by
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
       `,
-        [doc.title, doc.description, doc.fileName, `/uploads/documents/${doc.fileName}`, adminResult.insertId],
+        [
+          doc.title,
+          doc.description,
+          doc.fileName,
+          `/uploads/documents/${doc.fileName}`,
+          doc.fileSize,
+          doc.mimeType,
+          adminResult.insertId
+        ]
       )
 
       // Assign to all departments
       for (const deptId of departmentIds) {
-        await connection.execute("INSERT INTO document_departments (document_id, department_id) VALUES (?, ?)", [
-          docResult.insertId,
-          deptId,
-        ])
+        await connection.execute(
+          "INSERT INTO document_department_visibility (document_id, department_id) VALUES (?, ?)",
+          [docResult.insertId, deptId]
+        )
       }
 
       console.log(`✅ Documento creato: ${doc.title}`)
@@ -152,18 +172,18 @@ async function seedDatabase() {
     for (const note of sampleNotes) {
       const [noteResult] = await connection.execute(
         `
-        INSERT INTO notes (title, content, author_id, created_at) 
-        VALUES (?, ?, ?, NOW())
+        INSERT INTO notes (title, content, created_by) 
+        VALUES (?, ?, ?)
       `,
-        [note.title, note.content, adminResult.insertId],
+        [note.title, note.content, adminResult.insertId]
       )
 
       // Assign to all departments
       for (const deptId of departmentIds) {
-        await connection.execute("INSERT INTO note_departments (note_id, department_id) VALUES (?, ?)", [
-          noteResult.insertId,
-          deptId,
-        ])
+        await connection.execute(
+          "INSERT INTO note_department_visibility (note_id, department_id) VALUES (?, ?)",
+          [noteResult.insertId, deptId]
+        )
       }
 
       console.log(`✅ Nota creata: ${note.title}`)

@@ -8,11 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "setup-db": "node scripts/setup-database.js",
-    "test-db": "node scripts/test-connection.js",
     "migrate": "node scripts/run-migrations.js",
     "seed": "node scripts/seed-database.js",
-    "db:reset": "node scripts/reset-database.js",
     "db:migrate:seed": "npm run migrate && npm run seed"
   },
   "dependencies": {

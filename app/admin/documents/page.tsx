@@ -186,7 +186,7 @@ export default function AdminDocumentsPage() {
     }
   }
 
-  const handleEditDocument = async (e: React.FormEvent) => {
+  const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!editingDocument) return
 
@@ -199,6 +199,7 @@ export default function AdminDocumentsPage() {
 
     const token = localStorage.getItem("token")
     try {
+      // First update document details
       const response = await fetch(`/api/admin/documents/${editingDocument.id}`, {
         method: "PUT",
         headers: {
@@ -208,24 +209,39 @@ export default function AdminDocumentsPage() {
         body: JSON.stringify({
           title: formData.title,
           description: formData.description,
+        }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || "Errore nell'aggiornamento del documento")
+      }
+
+      // Then update visibility
+      const visibilityResponse = await fetch(`/api/admin/documents/${editingDocument.id}/visibility`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
           visibilityType: formData.visibilityType,
           visibilityIds,
         }),
       })
 
-      const data = await response.json()
-
-      if (response.ok) {
-        setSuccess("Documento aggiornato con successo")
-        setShowEditModal(false)
-        setEditingDocument(null)
-        resetForm()
-        fetchDocuments()
-      } else {
-        setError(data.error || "Errore nell'aggiornamento del documento")
+      if (!visibilityResponse.ok) {
+        const data = await visibilityResponse.json()
+        throw new Error(data.error || "Errore nell'aggiornamento della visibilità")
       }
+
+      setSuccess("Documento aggiornato con successo")
+      setShowEditModal(false)
+      setEditingDocument(null)
+      resetForm()
+      fetchDocuments()
     } catch (error) {
-      setError("Errore di rete. Riprova.")
+      setError(error instanceof Error ? error.message : "Errore di rete. Riprova.")
     }
   }
 
@@ -508,7 +524,7 @@ export default function AdminDocumentsPage() {
             <DialogDescription>Aggiorna le informazioni del documento e i permessi di visibilità</DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleEditDocument} className="space-y-6">
+          <form onSubmit={handleEditSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="edit_title">Titolo *</Label>
               <Input
